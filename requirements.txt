@@ -1,0 +1,10 @@
+torch==2.5.1
+torchvision
+transformers
+diffusers
+pillow
+opencv-python
+numpy
+matplotlib
+gradio
+xFormers
