@@ -4,6 +4,13 @@
 
 This guide will help you set up the Text to Image converter project. Please use Command Prompt (cmd) on Windows, or any terminal on Linux/Mac.
 
+## Run on colab
+The Google Colab notebook provides a convenient way to run the project without local setup:
+
+1. Open `Text-to-img.ipynb` in Google Colab
+2. Select 'Runtime' > 'Change runtime type' > Choose 'T4 GPU'
+3. Run all cells in sequence
+
 ### Step 1: Get the Code
 Clone the repository:
 ```bash
