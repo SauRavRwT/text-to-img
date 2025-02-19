@@ -53,7 +53,7 @@ def calculate_adaptive_guidance(prompt, base_guidance):
 def generate_image(
     prompt,
     steps=50,
-    guidance_base=15,
+    guidance_base=20,
     width=768,
     height=768,
     seed=-1,
@@ -63,20 +63,20 @@ def generate_image(
     negative_prompt = """
     # Critical Quality Issues
     low quality, worst quality, bad quality, jpeg artifacts, compression artifacts,
-    blurry, ugly, deformed, mutated, distorted, disfigured, poorly drawn, amateur,
+    blurry, ugly, deformed, mutated, distorted, disfigured, poorly drawn, amateur, messy, sloppy, unprofessional, broken, glitched, corrupted,
     
     # Anatomical Issues
     (deformed body:1.4), (deformed face:1.4), (deformed limbs:1.4), (bad anatomy:1.4),
     bad proportions, wrong proportions, out of proportion, anatomical errors,
     extra fingers, missing fingers, fused fingers, too many fingers, mutated hands,
     extra limbs, missing limbs, floating limbs, disconnected limbs, broken limbs,
-    extra joints, missing joints, broken joints, dislocated joints,
+    extra joints, missing joints, broken joints, dislocated joints, mutated joints, dislocated bones, (dislocated arms and legs:1.3), (duplicated limbs:1.2),( duplicated body parts:1.4), (merged body parts: 1.5),
     
     # Duplication and Repetition
     (duplicate:1.5), (duplicated:1.5), (cloned:1.5), (repeating:1.5), (multiple:1.5),
     (clone artifacts:1.5), (repetitive:1.5), (duplicated elements:1.5),
     duplicate faces, cloned faces, multiple faces, copied faces,
-    duplicate objects, cloned objects, multiple objects, copied objects,
+    duplicate objects, cloned objects, (multiple objects:1.5), (copied objects:1.3), (duplicated limbs:1.2), duplicated body parts, (merged body parts: 1.5),
     
     # Composition and Technical
     bad composition, unbalanced composition, poor composition, amateurish composition,
@@ -108,7 +108,7 @@ def generate_image(
     accurate proportions, precise details, beautiful lighting,
     exquisite texturing, proper anatomy, cohesive style,
     8k resolution, ultra HD, ray tracing, physically based rendering,
-    professional color grading, perfect shadows and highlights
+    professional color grading, perfect shadows and highlights, realistic rendering, cinematic quality, vibrant colors, stunning visuals, breathtaking scenery
     """.strip()
 
     # Calculate final guidance scale
@@ -153,7 +153,7 @@ interface = gr.Interface(
     inputs=[
         gr.Textbox(label="Enter your prompt", lines=3, placeholder="Describe the image you want to generate..."),
         gr.Slider(30, 150, value=50, step=1, label="Quality Steps (higher = better quality)"),
-        gr.Slider(7, 30, value=15, step=0.5, label="Base Guidance Scale (higher = stronger prompt adherence)"),
+        gr.Slider(7, 30, value=20, step=0.5, label="Base Guidance Scale (higher = stronger prompt adherence)"),
         gr.Slider(512, 1024, value=768, step=128, label="Width"),
         gr.Slider(512, 1024, value=768, step=128, label="Height"),
         gr.Number(label="Seed (-1 for random)", value=-1),

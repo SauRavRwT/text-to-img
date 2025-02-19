@@ -1,10 +1,14 @@
-torch==2.5.1
+--index-url https://download.pytorch.org/whl/cu118
+--extra-index-url https://pypi.org/simple
+
+torch==2.6.0
 torchvision
+torchaudio
 transformers
+xformers==0.0.29.post3
 diffusers
 pillow
 opencv-python
 numpy
-matplotlib
+fastai
 gradio
-xFormers
