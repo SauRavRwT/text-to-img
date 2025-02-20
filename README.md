@@ -1,9 +1,9 @@
-# Text to Image Converter
+# Text to Image Generator
 A Python-based text-to-image generation tool leveraging stable diffusion models. This application provides enhanced control over image generation through optimized parameters, improved prompting, and an efficient interface.
 
 Features include weighted negative prompts, dynamic thresholding, optimized VAE processing, and memory-efficient operations. Available both as a local application and Google Colab notebook for flexible deployment options.
 
-<img src="./Images/txt-to-img-1.png"/>
+<img src="./Images/txt-to-img-3.png"/>
 
 ## Key Improvements
 
