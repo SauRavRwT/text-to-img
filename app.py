@@ -45,15 +45,19 @@ if device == "cuda":
 def calculate_adaptive_guidance(prompt, base_guidance):
     """Enhanced adaptive guidance calculation with term weighting"""
     prompt_lower = prompt.lower()
-    
+
     # Extended guidance factors with refined weights
     term_categories = {
         "style": ['realistic', 'detailed', 'photographic', 'artistic', 'cartoon', 'anime', 'digital art', 'oil painting', 'watercolor', 'sketch', '3d render', 'cinematic', 'studio photo'],
         "color": ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'black', 'white', 'golden', 'silver', 'metallic', 'neon', 'pastel', 'vibrant', 'muted'],
         "composition": ['portrait', 'landscape', 'close-up', 'wide shot', 'aerial view', 'side view', 'front view', 'macro', 'ultra wide'],
-        "lighting": ['sunlight', 'studio lighting', 'dramatic lighting', 'soft light', 'hard light', 'backlight', 'natural light']
+        "lighting": ['sunlight', 'studio lighting', 'dramatic lighting', 'soft light', 'hard light', 'backlight', 'natural light'],
+        "ui_design": ['interface', 'ui', 'ux', 'website', 'app', 'dashboard', 'mockup', 'wireframe', 'layout', 'responsive', 'mobile', 'web design', 'minimal', 'modern'],
+        "ui_elements": ['button', 'card', 'menu', 'navigation', 'sidebar', 'footer', 'header', 'modal', 'form', 'input', 'slider', 'dropdown', 'icon', 'grid'],
+        "design_style": ['glassmorphism', 'neumorphism', 'material design', 'flat design', 'skeuomorphism', 'minimalist', 'brutalist', 'metro style'],
+        "design_properties": ['gradient', 'shadow', 'rounded', 'transparent', 'blur', 'dark mode', 'light mode', 'responsive', 'grid-based']
     }
-    
+
     # Calculate complexity with refined weights
     complexity = 1.0
     for category, terms in term_categories.items():
@@ -66,14 +70,18 @@ def calculate_adaptive_guidance(prompt, base_guidance):
             complexity += matches * 0.3  # Medium weight for composition terms
         elif category == "lighting":
             complexity += matches * 0.3  # Medium weight for lighting terms
-    
+        elif category in ["ui_design", "ui_elements"]:
+            complexity += matches * 0.35  # Weight for UI-specific terms
+        elif category in ["design_style", "design_properties"]:
+            complexity += matches * 0.3   # Weight for design properties
+
     # Add length-based complexity
     complexity += len(prompt.split()) * 0.05
-    
+
     # Apply logarithmic scaling to prevent excessive guidance
     complexity = min(complexity, 10.0)  # Cap complexity
     final_guidance = base_guidance * (1 + torch.log1p(torch.tensor(complexity - 1)).item())
-    
+
     return min(max(final_guidance, 7.0), 25.0)
 
 def generate_image(
@@ -115,15 +123,15 @@ def generate_image(
         out of character, style break, aesthetic mismatch, artistic inconsistency
         """.replace('\n', ' ').replace('    ', '').replace('# ', '')
 
-        # Enhanced positive prompt additions
+        # Enhanced positive prompt additions for UI/UX
         enhancement_prompt = """
         (masterpiece:1.2), (best quality:1.2), (ultra high resolution:1.2),
         (highly detailed:1.1), (sharp focus:1.1), (crystal clear:1.1),
-        professional photography, studio quality, perfect composition,
-        accurate proportions, precise details, beautiful lighting,
-        exquisite texturing, proper anatomy, cohesive style,
-        8k resolution, ultra HD, ray tracing, physically based rendering,
-        professional color grading, perfect shadows and highlights, realistic rendering, cinematic quality, vibrant colors, stunning visuals, breathtaking scenery
+        clean design, professional layout, pixel-perfect, modern aesthetics,
+        precise alignment, consistent spacing, balanced composition,
+        high-fidelity mockup, clear typography, polished interface,
+        8k resolution, ultra HD, perfect rendering, sharp edges,
+        professional UI design, pristine quality, flawless execution
         """.strip()
 
         # Calculate final guidance scale
@@ -149,9 +157,11 @@ def generate_image(
             generator=generator,
             num_images_per_prompt=1,
         ).images[0]
-        
-        return image
 
+        return image
+    except torch.cuda.OutOfMemoryError:
+        logger.error("GPU out of memory. Try reducing image size or model complexity.")
+        return None
     except Exception as e:
         logger.error(f"Error generating image: {e}")
         return None
@@ -171,25 +181,51 @@ with gr.Blocks() as demo:
             adaptive_guidance = gr.Checkbox(label="Use Adaptive Guidance", value=True, info="Automatically adjusts guidance based on prompt complexity")
             generate_button = gr.Button("Generate Image")
             random_prompt = gr.Button("Suprise Me!")
+            status_text = gr.Markdown("Loading model... This may take a few minutes.")
         with gr.Column(scale=1):
             output_image = gr.Image(label="AI Generated Image", type="pil")
             clear_button = gr.Button("Clear")
-    
-    # Example prompts
+
+    # Example prompts with categorized sections
     prompt_suggestions = [
+        # UI Design Systems
+        "Modern design system components, light theme, organized grid layout, typography hierarchy, input fields and buttons, minimalist style",
+        "Material Design 3.0 component library, rounded corners, elevation shadows, floating action buttons, system bars and navigation",
+        "iOS 16 style UI kit, blur effects, dynamic island, widgets collection, control center elements, system components",
+        
+        # Web Layouts
+        "SaaS product landing page, hero section with 3D elements, feature grid, testimonials section, pricing cards, modern web design",
+        "Portfolio website design, masonry grid gallery, minimalist navigation, project cards, smooth transitions, creative layout",
+        "Blog platform interface, clean typography, article cards, sidebar widgets, newsletter signup form, reading progress bar",
+        
+        # Dashboards & Analytics
+        "Analytics dashboard dark theme, data visualization widgets, metric cards, line charts and bar graphs, admin panel layout",
+        "Finance app dashboard, crypto widgets, stock charts, wallet interface, transaction history, modern fintech design",
+        "Project management tool interface, kanban board layout, task cards, team collaboration features, calendar integration",
+        
+        # Mobile Interfaces
+        "Social media app UI, stories carousel, feed layout, navigation tabs, profile screen, interaction buttons",
+        "Food delivery app interface, restaurant cards, order process flow, cart interface, payment screens, tracking view",
+        "Fitness tracking app UI, workout planner, progress charts, achievement badges, profile statistics, dark theme",
+        
+        # E-commerce
+        "E-commerce mobile app, product grid view, shopping cart, checkout flow, payment form, order confirmation",
+        "Fashion store website, lookbook gallery, category navigation, product details page, size selector, wishlist feature",
+
+        # random
         "A majestic lion in the African savanna at sunset, detailed fur, golden hour lighting, realistic, 8k photography",
         "A futuristic cyberpunk city street at night, neon lights, rain reflections, highly detailed, cinematic lighting",
         "A serene Japanese garden with cherry blossoms, traditional architecture, soft natural lighting, spring season",
         "A professional portrait of a young woman, studio lighting, shallow depth of field, high fashion photography",
         "A magical forest scene with glowing mushrooms, fantasy elements, mystical atmosphere, volumetric lighting",
         "A realistic digital painting of a sci-fi spaceship, detailed textures, metallic surfaces, space background",
-        "A low quality pixelated image with jpeg artifacts, blurry, distorted, poorly drawn, bad composition",
+        "A low quality pixelated image with jpeg artifacts, blurry, distorted, poorly drawn, bad composition"
     ]
-    
+
     # Event handlers
     generate_button.click(generate_image, inputs=[prompt, steps, guidance, width, height, seed, adaptive_guidance], outputs=output_image)
     random_prompt.click(lambda: random.choice(prompt_suggestions), outputs=prompt)
-    clear_button.click(lambda: [None, 50, 20, 768, 768, -1, True], outputs=[prompt, steps, guidance, width, height, seed, adaptive_guidance])   
-
+    clear_button.click(lambda: [None, 50, 20, 768, 768, -1, True], outputs=[prompt, steps, guidance, width, height, seed, adaptive_guidance])
+    status_text.value = "Model loaded and ready!"
 # Launch the interface
 demo.launch(share=True, debug=True)
