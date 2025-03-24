@@ -1,2 +1,5 @@
 #ignore virtual environment files mine is venv type yours.
 venv
+
+# HuggingFace Token
+.huggingface

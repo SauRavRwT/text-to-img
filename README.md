@@ -3,7 +3,7 @@ A Python-based text-to-image generation tool leveraging stable diffusion models.
 
 Features include weighted negative prompts, dynamic thresholding, optimized VAE processing, and memory-efficient operations. Available both as a local application and Google Colab notebook for flexible deployment options.
 
-<img src="./Images/txt-to-img-3.png"/>
+<img src="./Images/txt-to-img-4.png"/>
 
 ## Key Improvements
 
